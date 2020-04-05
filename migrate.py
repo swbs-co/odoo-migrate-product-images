@@ -86,7 +86,7 @@ source_child_public_categ_recs =  source_public_categ.read(source_child_public_c
 print source_target_parent_id_map
 for source_cat_rec in source_child_public_categ_recs:
     print 'processing child public category from source ', source_cat_rec
-    print '    ', str(source_cat_rec['parent_id'][0]) in source_target_parent_id_map, ' checking for mapping of ', str(source_cat_rec['parent_id'][0], ' in ', source_target_parent_id_map
+    print '    ', str(source_cat_rec['parent_id'][0]) in source_target_parent_id_map, ' checking for mapping of ', str(source_cat_rec['parent_id'][0]), ' in ', source_target_parent_id_map
     try:
         if str(source_cat_rec['parent_id'][0]) in source_target_parent_id_map:
             pub_cat_found = target_public_categ.search([('name', '=', source_cat_rec['name']), ('sequence', '=', source_cat_rec['sequence']), ('parent_id', '=', source_target_parent_id_map[source_cat_rec['parent_id'][0]])], limit=1)
