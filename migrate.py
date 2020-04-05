@@ -46,7 +46,7 @@ try:
 	source_conn.check_login()
 except Exception as e:
 	print 'Could not connect to source server'
-    raise
+    #raise e
 
 target_conn = openerplib.get_connection(hostname=args.target_hostname, database=args.target_database, login=args.target_username, password=args.target_password, port=args.target_port or 'auto', protocol=args.target_protocol)
 try:
@@ -86,10 +86,10 @@ source_child_public_categ_recs =  source_public_categ.read(source_child_public_c
 for source_cat_rec in source_child_public_categ_recs:
     print 'processing child public category from source ', source_cat_rec
     try:
-        if str(source_cat_rec['parent_id']) in source_target_parent_id_map:
-            pub_cat_found = target_public_categ.search([('name', '=', source_cat_rec['name']), ('sequence', '=', source_cat_rec['sequence']), ('parent_id', '=', source_target_parent_id_map[source_cat_rec['parent_id']])], limit=1)
+        if str(source_cat_rec['parent_id'][0]) in source_target_parent_id_map:
+            pub_cat_found = target_public_categ.search([('name', '=', source_cat_rec['name']), ('sequence', '=', source_cat_rec['sequence']), ('parent_id', '=', source_target_parent_id_map[source_cat_rec['parent_id'][0]])], limit=1)
             if not pub_cat_found:
-                target_categ_id = target_public_categ.create({'name': source_cat_rec['name'], 'sequence': source_cat_rec['sequence'], 'parent_id': source_target_parent_id_map[str(source_cat_rec['parent_id'])]})
+                target_categ_id = target_public_categ.create({'name': source_cat_rec['name'], 'sequence': source_cat_rec['sequence'], 'parent_id': source_target_parent_id_map[str(source_cat_rec['parent_id'][0])]})
                 print 'Created public category in target DB ', target_categ_id
                 source_target_parent_id_map[str(source_cat_rec['id'])] = target_categ_id
             else:
@@ -140,7 +140,7 @@ for product in target_product_recs:
                     product_vals = {'image': source_product['image'], 'image_medium': source_product['image_medium']}
                     if pub_cat_ids:
                         product_vals['public_categ_ids'] = [(6, 0, pub_cat_ids)]
-                        print ' ecom category for product ', product['id'], ' is '
+                        print ' ecom category for product ', product['id'], ' is ', product_vals['public_categ_ids']
                     target_product_obj.write(product['id'], product_vals)
                     updated = True
                     print 'DONE ', product['id'] #, ' -- ', product['name']
