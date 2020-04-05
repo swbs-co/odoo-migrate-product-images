@@ -45,8 +45,8 @@ source_conn = openerplib.get_connection(hostname=args.source_hostname, database=
 try:
 	source_conn.check_login()
 except Exception as e:
-	print "Could not connect to source server"
-	raise
+	print 'Could not connect to source server'
+    raise
 
 target_conn = openerplib.get_connection(hostname=args.target_hostname, database=args.target_database, login=args.target_username, password=args.target_password, port=args.target_port or 'auto', protocol=args.target_protocol)
 try:
@@ -66,12 +66,15 @@ source_parent_public_categ_recs =  source_public_categ.read(source_parent_public
 source_target_parent_id_map = {}
 
 for source_parent_cat_rec in source_parent_public_categ_recs:
+    print 'processsing parent category from source ', source_parent_cat_rec
     try:
         pub_cat_found = target_public_categ.search([('name', '=', source_parent_cat_rec['name']), ('sequence', '=', source_parent_cat_rec['sequence']), ('parent_id', '=', False)], limit=1)
         if not pub_cat_found:
             target_categ_id = target_public_categ.create({'name': source_parent_cat_rec['name'], 'sequence': source_parent_cat_rec['sequence']})
+            print 'Created public category in target DB ', target_categ_id
             source_target_parent_id_map[str(source_parent_cat_rec['id'])] = target_categ_id
         else:
+            print 'public category already exists ', pub_cat_found[0]
             source_target_parent_id_map[str(source_parent_cat_rec['id'])] = pub_cat_found[0]
     except Exception as e:
         print e
@@ -81,14 +84,19 @@ source_child_public_categ_ids = source_public_categ.search([('parent_id', '!=', 
 source_child_public_categ_recs =  source_public_categ.read(source_child_public_categ_ids, ['id', 'name', 'sequence', 'parent_id'])
 
 for source_cat_rec in source_child_public_categ_recs:
+    print 'processing child public category from source ', source_cat_rec
     try:
         if str(source_cat_rec['parent_id']) in source_target_parent_id_map:
             pub_cat_found = target_public_categ.search([('name', '=', source_cat_rec['name']), ('sequence', '=', source_cat_rec['sequence']), ('parent_id', '=', source_target_parent_id_map[source_cat_rec['parent_id']])], limit=1)
             if not pub_cat_found:
                 target_categ_id = target_public_categ.create({'name': source_cat_rec['name'], 'sequence': source_cat_rec['sequence'], 'parent_id': source_target_parent_id_map[str(source_cat_rec['parent_id'])]})
+                print 'Created public category in target DB ', target_categ_id
                 source_target_parent_id_map[str(source_cat_rec['id'])] = target_categ_id
             else:
+                print 'public category already exists ', pub_cat_found[0]
                 source_target_parent_id_map[str(source_cat_rec['id'])] = pub_cat_found[0]
+        else:
+            print 'SKIP category because its parent is not found'
     except Exception as e:
         print e
         print 'ERROR while processing Ecom-Category ' ,  source_cat_rec ['id'], ' -- ', source_cat_rec['name']
@@ -132,16 +140,16 @@ for product in target_product_recs:
                     product_vals = {'image': source_product['image'], 'image_medium': source_product['image_medium']}
                     if pub_cat_ids:
                         product_vals['public_categ_ids'] = [(6, 0, pub_cat_ids)]
-                    print 'updating product with vals ', product_vals
+                        print ' ecom category for product ', product['id'], ' is '
                     target_product_obj.write(product['id'], product_vals)
-                    print 'DONE ', product['id'] #, ' -- ', product['name']
                     updated = True
+                    print 'DONE ', product['id'] #, ' -- ', product['name']
                 #common_products[product['id']] = {'image': source_product['image']}
         #if not updated:
-        #    print 'SKIPPED ',  product['id'] #, ' -- ', product['name']
+        #    print 'SKIPPED ',  product['id'], ' -- ', product['name']
     except Exception as e:
         print e
-        print 'ERROR while process ' ,  product['id'] #, ' -- ', product['name']
+        print 'ERROR while process ' ,  product['id'], ' -- ', product['name']
         
 
 
