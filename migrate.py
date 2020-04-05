@@ -89,7 +89,7 @@ for source_cat_rec in source_child_public_categ_recs:
     print '    ', str(source_cat_rec['parent_id'][0]) in source_target_parent_id_map, ' checking for mapping of ', str(source_cat_rec['parent_id'][0]), ' in ', source_target_parent_id_map
     try:
         if str(source_cat_rec['parent_id'][0]) in source_target_parent_id_map:
-            pub_cat_found = target_public_categ.search([('name', '=', source_cat_rec['name']), ('sequence', '=', source_cat_rec['sequence']), ('parent_id', '=', source_target_parent_id_map[source_cat_rec['parent_id'][0]])], limit=1)
+            pub_cat_found = target_public_categ.search([('name', '=', source_cat_rec['name']), ('sequence', '=', source_cat_rec['sequence']), ('parent_id', '=', source_target_parent_id_map[str(source_cat_rec['parent_id'][0])])], limit=1)
             if not pub_cat_found:
                 target_categ_id = target_public_categ.create({'name': source_cat_rec['name'], 'sequence': source_cat_rec['sequence'], 'parent_id': source_target_parent_id_map[str(source_cat_rec['parent_id'][0])]})
                 print 'Created public category in target DB ', target_categ_id
