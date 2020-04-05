@@ -129,16 +129,18 @@ for product in target_product_recs:
                 #product_image = source_product_obj.read(source_product['id'], ['image']) #, 
                 #if product_image[0]['image']:
                 if source_product['image']:
-                    print 'DONE ', product['id'] #, ' -- ', product['name']
                     product_vals = {'image': source_product['image'], 'image_medium': source_product['image_medium']}
                     if pub_cat_ids:
                         product_vals['public_categ_ids'] = [(6, 0, pub_cat_ids)]
+                    print 'updating product with vals ', product_vals
                     target_product_obj.write(product['id'], product_vals)
+                    print 'DONE ', product['id'] #, ' -- ', product['name']
                     updated = True
                 #common_products[product['id']] = {'image': source_product['image']}
-        if not updated:
-            print 'SKIPPED ',  product['id'] #, ' -- ', product['name']
-    except Exception:
+        #if not updated:
+        #    print 'SKIPPED ',  product['id'] #, ' -- ', product['name']
+    except Exception as e:
+        print e
         print 'ERROR while process ' ,  product['id'] #, ' -- ', product['name']
         
 
