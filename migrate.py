@@ -80,11 +80,13 @@ for source_parent_cat_rec in source_parent_public_categ_recs:
         print e
         print 'ERROR while processing Ecom-Category ' ,  source_parent_cat_rec['id'], ' -- ', source_parent_cat_rec['name']
         
-source_child_public_categ_ids = source_public_categ.search([('parent_id', '!=', False)])
+source_child_public_categ_ids = source_public_categ.search([('parent_id', '!=', False)], order='id asc, parent_id asc')
 source_child_public_categ_recs =  source_public_categ.read(source_child_public_categ_ids, ['id', 'name', 'sequence', 'parent_id'])
 
+print source_target_parent_id_map
 for source_cat_rec in source_child_public_categ_recs:
     print 'processing child public category from source ', source_cat_rec
+    print '    ', str(source_cat_rec['parent_id'][0]) in source_target_parent_id_map, ' checking for mapping of ', str(source_cat_rec['parent_id'][0], ' in ', source_target_parent_id_map
     try:
         if str(source_cat_rec['parent_id'][0]) in source_target_parent_id_map:
             pub_cat_found = target_public_categ.search([('name', '=', source_cat_rec['name']), ('sequence', '=', source_cat_rec['sequence']), ('parent_id', '=', source_target_parent_id_map[source_cat_rec['parent_id'][0]])], limit=1)
@@ -96,7 +98,7 @@ for source_cat_rec in source_child_public_categ_recs:
                 print 'public category already exists ', pub_cat_found[0]
                 source_target_parent_id_map[str(source_cat_rec['id'])] = pub_cat_found[0]
         else:
-            print 'SKIP category because its parent is not found'
+            print 'SKIP category because its parent is not found '
     except Exception as e:
         print e
         print 'ERROR while processing Ecom-Category ' ,  source_cat_rec ['id'], ' -- ', source_cat_rec['name']
